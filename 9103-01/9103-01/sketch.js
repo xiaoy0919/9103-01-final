@@ -1,8 +1,9 @@
-let img1, img2; 
-let numSegments = 300; 
+let img1, img2;
+let numSegments = 300;
 let showSecondImage = false; // Track whether the second image screen is displayed
 let isBlackScreen = false; // Track whether the lock screen (black screen) is displayed
 let scaleFactor, displayWidth, displayHeight, offsetX, offsetY;
+let nameField, ageField;
 
 function preload() {   
     img1 = loadImage('assets/1.jpg');   
@@ -11,7 +12,17 @@ function preload() {
 
 function setup() {   
     createCanvas(windowWidth, windowHeight);   
-    noLoop(); 
+    noLoop();
+  
+    // Create input fields for lock screen
+    nameField = createInput('');
+    nameField.attribute('placeholder', 'Your Name');
+    nameField.size(100);
+    nameField.hide(); // Hide initially
+
+    ageField = createInput('72', 'number');
+    ageField.size(100);
+    ageField.hide(); // Hide initially
 }
 
 function draw() {   
@@ -29,14 +40,35 @@ function draw() {
         // Draw black lock screen covering the image area
         fill(0);     
         noStroke();     
-        rect(offsetX, offsetY, displayWidth, displayHeight);   
+        rect(offsetX, offsetY, displayWidth, displayHeight);
+
+        // Show input fields on lock screen
+        nameField.position(offsetX + 50, offsetY + 50);
+        ageField.position(offsetX + 50, offsetY + 90);
+        nameField.show();
+        ageField.show();
+
+        // Display text if fields are filled
+        let name = nameField.value();
+        let age = ageField.value();
+        fill(255);
+        textSize(24);
+        if (name) {
+            text("Hello, my name is " + name, offsetX + 50, offsetY + 250);
+            text(I am ${age} years old, offsetX + 50, offsetY + 280);
+        }
     } else {     
+        // Hide input fields outside lock screen
+        nameField.hide();
+        ageField.hide();
+      
         // Show img1 or img2 based on selection, simulating the image screens
         let img = showSecondImage ? img2 : img1;     
         drawImageWithSegments(img);   
     }   
+    //The input years functionality is adapted from *User Input: Text Fields* by Samizdat, available at [https://editor.p5js.org/Samizdat/sketches/eUsieMk6j].
 
-    // Draw the silver iPadcase around the image area
+    // Draw the silver border around the image area
     stroke(205);   
     strokeWeight(100 * scaleFactor);   
     noFill();   
@@ -51,17 +83,17 @@ function draw() {
     let circleDiameter = displayWidth * 0.025;   
     ellipse(circleX, circleY, circleDiameter, circleDiameter);   
 
-    // Draw gray rectangle as iPad lock screen button,
+    // Draw gray rectangle as iPad lock screen button
     fill(150);   
     noStroke();   
     let buttonWidth = (displayWidth * 0.02) / 2;    
     let buttonHeight = (displayHeight * 0.15) / 2;    
     let buttonX = offsetX - 15 * scaleFactor - buttonWidth - 25;   
-    let buttonY = offsetY + displayHeight / 2 - buttonHeight / 2 - 200; 
+    let buttonY = offsetY + displayHeight / 2 - buttonHeight / 2 - 200;
     rect(buttonX, buttonY, buttonWidth, buttonHeight, 5 * scaleFactor);   
 }
 
-// Draw segmented image function for img1 or img2 (Screen1 or screen2)
+// Draw segmented image function for img1 or img2
 function drawImageWithSegments(img) {   
     let segmentWidth = displayWidth / numSegments;   
     let segmentHeight = displayHeight / numSegments;   
