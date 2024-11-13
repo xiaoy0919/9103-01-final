@@ -3,26 +3,28 @@ let numSegments = 300;
 let showSecondImage = false; // Track whether the second image screen is displayed
 let isBlackScreen = false; // Track whether the lock screen (black screen) is displayed
 let scaleFactor, displayWidth, displayHeight, offsetX, offsetY;
-let nameField, ageField;
+let input, paragraph;
 
 function preload() {   
     img1 = loadImage('assets/1.jpg');   
-    img2 = loadImage('assets/2.png'); // Load the second screen
+    img2 = loadImage('assets/2.png'); // Load the second image
 }
 
 function setup() {   
     createCanvas(windowWidth, windowHeight);   
     noLoop();
   
-    // Create input fields for lock screen
-    nameField = createInput('');
-    nameField.attribute('placeholder', 'Your Name');
-    nameField.size(100);
-    nameField.hide(); // Hide initially
+    // Create input field and paragraph for password check on lock screen
+    input = createInput("");
+    input.attribute('placeholder', 'Enter Password');
+    input.size(400); // Scale input field size by a factor of 4
+    input.style('font-size', '32px'); // Scale font size by a factor of 4
+    input.hide(); // Hide initially
 
-    ageField = createInput('72', 'number');
-    ageField.size(100);
-    ageField.hide(); // Hide initially
+    paragraph = createP("Waiting for input...");
+    paragraph.style('color', 'white'); // Set text color to white
+    paragraph.style('font-size', '32px'); // Scale font size by a factor of 4
+    paragraph.hide(); // Hide initially
 }
 
 function draw() {   
@@ -42,31 +44,24 @@ function draw() {
         noStroke();     
         rect(offsetX, offsetY, displayWidth, displayHeight);
 
-        // Show input fields on lock screen
-        nameField.position(offsetX + 50, offsetY + 50);
-        ageField.position(offsetX + 50, offsetY + 90);
-        nameField.show();
-        ageField.show();
+        // Show password input field and paragraph on lock screen
+        input.position(offsetX + displayWidth / 2 - 200, offsetY + displayHeight / 2 - 40); // Adjust position for scaled input
+        paragraph.position(offsetX + displayWidth / 2 - 200, offsetY + displayHeight / 2 + 50);
+        input.show();
+        paragraph.show();
 
-        // Display text if fields are filled
-        let name = nameField.value();
-        let age = ageField.value();
-        fill(255);
-        textSize(24);
-        if (name) {
-            text("Hello, my name is " + name, offsetX + 50, offsetY + 250);
-            text(I am ${age} years old, offsetX + 50, offsetY + 280);
-        }
+        // Listen for input change
+        input.changed(checkPassword);
     } else {     
         // Hide input fields outside lock screen
-        nameField.hide();
-        ageField.hide();
+        input.hide();
+        paragraph.hide();
       
         // Show img1 or img2 based on selection, simulating the image screens
         let img = showSecondImage ? img2 : img1;     
         drawImageWithSegments(img);   
     }   
-    //The input years functionality is adapted from *User Input: Text Fields* by Samizdat, available at [https://editor.p5js.org/Samizdat/sketches/eUsieMk6j].
+//This part includes techniques inspired by Mahdadbor’s "password demo" available on p5.js.Available at: https://editor.p5js.org/mahdadbor/sketches/cEwKTI5m3 Accessed on: [2024.11.13]
 
     // Draw the silver border around the image area
     stroke(205);   
@@ -107,6 +102,19 @@ function drawImageWithSegments(img) {
     } 
 }
 
+// Check password function
+function checkPassword() {
+    // Check if the input value is a number (any numeric input is accepted as correct)
+    if (!isNaN(input.value()) && input.value().trim() !== "") { 
+        paragraph.html("Correct Password");
+        showSecondImage = true; // Switch to img2 upon correct password
+        isBlackScreen = false; // Exit lock screen
+        redraw(); // Redraw to display img2
+    } else {
+        paragraph.html("Wrong password");
+    }
+}
+
 // Handle click events for switching between screens and lock screen activation
 function mousePressed() {   
     // Check if clicked inside the white circle (return button) to switch images
@@ -137,4 +145,4 @@ function mousePressed() {
 function windowResized() {   
     resizeCanvas(windowWidth, windowHeight);   
     redraw(); 
-}
+} 
